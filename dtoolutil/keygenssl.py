@@ -16,25 +16,23 @@ def generate_ssl_certificate(cert_path="cert.pem", key_path="key.pem"):
         key_path (str): Path to save the private key file.
     """
     try:
-        # Fetch system-specific details
-        hostname = socket.gethostname()  # Get the machine's hostname
-        fqdn = socket.getfqdn()         # Get the fully qualified domain name
-        username = getpass.getuser()    # Get the current user's name
+        hostname = socket.gethostname()
+        fqdn = socket.getfqdn()
+        username = getpass.getuser()
 
-        # Generate private key
+        
         private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
             backend=default_backend()
         )
 
-        # Generate self-signed certificate
         subject = issuer = x509.Name([
-            x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),  # Default to "US"
-            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Unknown"),  # Default to "Unknown"
-            x509.NameAttribute(NameOID.LOCALITY_NAME, u"Unknown"),  # Default to "Unknown"
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, username),  # Use the current user's name
-            x509.NameAttribute(NameOID.COMMON_NAME, fqdn),  # Use the fully qualified domain name
+            x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
+            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Unknown"),
+            x509.NameAttribute(NameOID.LOCALITY_NAME, u"Unknown"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, username),
+            x509.NameAttribute(NameOID.COMMON_NAME, fqdn),
         ])
         cert = x509.CertificateBuilder().subject_name(
             subject
@@ -47,17 +45,15 @@ def generate_ssl_certificate(cert_path="cert.pem", key_path="key.pem"):
         ).not_valid_before(
             datetime.datetime.utcnow()
         ).not_valid_after(
-            # Certificate valid for 1 year
             datetime.datetime.utcnow() + datetime.timedelta(days=365)
         ).add_extension(
             x509.SubjectAlternativeName([
-                x509.DNSName(fqdn),  # Add the fully qualified domain name
-                x509.DNSName(hostname),  # Add the hostname
+                x509.DNSName(fqdn),
+                x509.DNSName(hostname),
             ]),
             critical=False,
         ).sign(private_key, hashes.SHA256(), default_backend())
 
-        # Write the private key to a file
         with open(key_path, "wb") as key_file:
             key_file.write(private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -65,7 +61,6 @@ def generate_ssl_certificate(cert_path="cert.pem", key_path="key.pem"):
                 encryption_algorithm=serialization.NoEncryption()
             ))
 
-        # Write the certificate to a file
         with open(cert_path, "wb") as cert_file:
             cert_file.write(cert.public_bytes(serialization.Encoding.PEM))
 

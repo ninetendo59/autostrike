@@ -48,11 +48,9 @@ class webPathUtil:
 						paths.append(relative_path)
 						
 						if full_url.endswith("/"):
-							# Flatten the result of the recursive call
 							paths.extend(webPathUtil.grepWebPathList(full_url, _base_url, _visited))
 			
-			# Remove empty arrays and flatten the list
-			paths = [item for item in paths if item]  # Remove empty strings or arrays
+			paths = [item for item in paths if item]
 	
 		except Exception as e:
 			customcls()
